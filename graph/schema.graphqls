@@ -1,0 +1,276 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# schema.graphqls
+
+# Enums
+enum BookCategory {
+  FICTION
+  NON_FICTION
+  SCIENCE_FICTION
+  FANTASY
+  MYSTERY
+  ROMANCE
+  THRILLER
+  BIOGRAPHY
+  HISTORY
+  SCIENCE
+  SELF_HELP
+  CHILDREN
+}
+
+enum BookStatus {
+  AVAILABLE
+  CHECKED_OUT
+  OUT_OF_PRINT
+  LOST
+  IN_REPAIR
+}
+
+enum UserRole {
+  READER
+  MEMBER
+  LIBRARIAN
+  ADMIN
+}
+
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+  OVERDUE
+  LOST
+}
+
+# Types
+type Author {
+  _id: ID!
+  name: String!
+  biography: String
+  birthDate: String
+  nationality: String
+  books: [Book!]
+  awards: [String!]
+  websiteURL: String
+}
+
+type Publisher {
+  _id: ID!
+  name: String!
+  foundedYear: Int
+  location: String
+  books: [Book!]
+  websiteURL: String
+}
+
+type Book {
+  _id: ID!
+  isbn: String
+  title: String!
+  description: String
+  publishedYear: Int
+  pageCount: Int
+  language: String
+  category: BookCategory
+  status: BookStatus
+  authors: [Author!]!
+  publisher: Publisher
+  price: Float
+  discountPercentage: Float
+  totalCopies: Int
+  availableCopies: Int
+  coverImageURL: String
+  tags: [String!]
+  averageRating: Float
+  totalRatings: Int
+}
+
+type Review {
+  _id: ID!
+  book: Book!
+  user: User!
+  rating: Int!
+  reviewText: String
+  reviewDate: String!
+}
+
+type User {
+  _id: ID!
+  username: String!
+  email: String!
+  fullName: String
+  registrationDate: String!
+  role: UserRole!
+  reviews: [Review!]
+  borrowedBooks: [BookBorrow!]
+}
+
+type BookBorrow {
+  _id: ID!
+  book: Book!
+  user: User!
+  borrowDate: String!
+  dueDate: String!
+  returnDate: String
+  status: BorrowStatus!
+}
+
+# Input types for creation
+input BookInput {
+  title: String!
+  isbn: String
+  description: String
+  publishedYear: Int
+  pageCount: Int
+  language: String
+  category: BookCategory
+  authorIds: [ID!]
+  publisherId: ID
+  price: Float
+  discountPercentage: Float
+  totalCopies: Int
+  coverImageURL: String
+  tags: [String!]
+}
+
+input AuthorInput {
+  name: String!
+  biography: String
+  birthDate: String
+  nationality: String
+  awards: [String!]
+  websiteURL: String
+}
+
+input PublisherInput {
+  name: String!
+  foundedYear: Int
+  location: String
+  websiteURL: String
+}
+
+input ReviewInput {
+  bookId: ID!
+  userID: ID!
+  rating: Int!
+  reviewText: String
+}
+
+# Input types for updates
+input BookUpdateInput {
+  title: String
+  isbn: String
+  description: String
+  publishedYear: Int
+  pageCount: Int
+  language: String
+  category: BookCategory
+  status: BookStatus
+  authorIds: [ID!]
+  publisherId: ID
+  price: Float
+  discountPercentage: Float
+  totalCopies: Int
+  coverImageURL: String
+  tags: [String!]
+}
+
+input AuthorUpdateInput {
+  name: String
+  biography: String
+  birthDate: String
+  nationality: String
+  awards: [String!]
+  websiteURL: String
+}
+
+input PublisherUpdateInput {
+  name: String
+  foundedYear: Int
+  location: String
+  websiteURL: String
+}
+
+input ReviewUpdateInput {
+  rating: Int
+  reviewText: String
+}
+
+
+input UserUpdateInput {
+  username: String
+  email: String
+  fullName: String
+  currentPassword: String
+  newPassword: String
+  role: UserRole
+}
+
+input BookBorrowUpdateInput {
+  dueDate: String
+  returnDate: String
+  status: BorrowStatus
+}
+
+# Queries
+type Query {
+  books(
+    category: BookCategory
+    status: BookStatus
+    minRating: Float
+    tags: [String!]
+    limit: Int = 10
+    offset: Int = 0
+  ): [Book!]!
+  book(id: ID!): Book
+  searchBooks(query: String!): [Book!]!
+  
+  authors(limit: Int = 10, offset: Int = 0): [Author!]!
+  author(id: ID!): Author
+  
+  publishers(limit: Int = 10, offset: Int = 0): [Publisher!]!
+  publisher(id: ID!): Publisher
+  
+  currentUser: User
+  userBorrows(userId: ID!): [BookBorrow!]!
+  overdueBooks: [BookBorrow!]!
+}
+
+# Mutations
+type Mutation {
+  # Book mutations
+  createBook(input: BookInput!): Book!
+  updateBook(id: ID!, input: BookUpdateInput!): Book!
+  deleteBook(id: ID!): Boolean!
+
+  # Author mutations
+  createAuthor(input: AuthorInput!): Author!
+  updateAuthor(id: ID!, input: AuthorUpdateInput!): Author!
+  deleteAuthor(id: ID!): Boolean!
+
+  # Publisher mutations
+  createPublisher(input: PublisherInput!): Publisher!
+  updatePublisher(id: ID!, input: PublisherUpdateInput!): Publisher!
+  deletePublisher(id: ID!): Boolean!
+
+  # User mutations
+  registerUser(
+    username: String!
+    email: String!
+    password: String!
+    fullName: String
+    role: UserRole!
+  ): User!
+  updateUser(id: ID!, input: UserUpdateInput!): User!
+  deleteUser(id: ID!): Boolean!
+
+  # BookBorrow mutations
+  borrowBook(bookId: ID!, userId: ID!): BookBorrow!
+  updateBookBorrow(id: ID!, input: BookBorrowUpdateInput!): BookBorrow!
+  returnBook(borrowId: ID!): BookBorrow!
+
+  # Review mutations
+  addReview(input: ReviewInput!): Review!
+  updateReview(id: ID!, input: ReviewUpdateInput!): Review!
+  deleteReview(id: ID!): Boolean!
+}
