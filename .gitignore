@@ -1,0 +1,54 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.out
+
+# Compiled object files
+*.o
+*.obj
+
+# Build directories
+/build/
+bin/
+
+# Go-related files
+*.log
+*.test
+*.mod
+*.sum
+/vendor/
+
+# IDE specific files
+.idea/
+.vscode/
+*.iml
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# GraphQL related files
+graphql/schema.graphql
+*.graphql
+*.gql
+
+# Generated GraphQL files
+generated/
+*.gen.go
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# Dependency directories
+node_modules/
+.DS_Store
+
+# MacOS specific files
+Thumbs.db
