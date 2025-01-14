@@ -10,21 +10,19 @@ import (
 	"context"
 )
 
-var db = database.Connect()
-
 // CreateBook is the resolver for the createBook field.
 func (r *mutationResolver) CreateBook(ctx context.Context, input model.BookInput) (*model.Book, error) {
-	return db.CreateBookInput(input), nil
+	return database.CreateBookInput(input), nil
 }
 
 // UpdateBook is the resolver for the updateBook field.
 func (r *mutationResolver) UpdateBook(ctx context.Context, id string, input model.BookUpdateInput) (*model.Book, error) {
-	return db.UpdateBook(id, input), nil
+	return database.UpdateBook(id, input), nil
 }
 
 // DeleteBook is the resolver for the deleteBook field.
 func (r *mutationResolver) DeleteBook(ctx context.Context, id string) (bool, error) {
-	err := db.DeleteBook(id)
+	err := database.DeleteBook(id)
 	if err != nil {
 		return false, err
 	}
@@ -33,17 +31,17 @@ func (r *mutationResolver) DeleteBook(ctx context.Context, id string) (bool, err
 
 // CreateAuthor is the resolver for the createAuthor field.
 func (r *mutationResolver) CreateAuthor(ctx context.Context, input model.AuthorInput) (*model.Author, error) {
-	return db.CreateAuthorInput(input), nil
+	return database.CreateAuthorInput(input), nil
 }
 
 // UpdateAuthor is the resolver for the updateAuthor field.
 func (r *mutationResolver) UpdateAuthor(ctx context.Context, id string, input model.AuthorUpdateInput) (*model.Author, error) {
-	return db.UpdateAuthor(id, input), nil
+	return database.UpdateAuthor(id, input), nil
 }
 
 // DeleteAuthor is the resolver for the deleteAuthor field.
 func (r *mutationResolver) DeleteAuthor(ctx context.Context, id string) (bool, error) {
-	err := db.DeleteAuthor(id)
+	err := database.DeleteAuthor(id)
 	if err != nil {
 		return false, nil
 	}
@@ -52,17 +50,17 @@ func (r *mutationResolver) DeleteAuthor(ctx context.Context, id string) (bool, e
 
 // CreatePublisher is the resolver for the createPublisher field.
 func (r *mutationResolver) CreatePublisher(ctx context.Context, input model.PublisherInput) (*model.Publisher, error) {
-	return db.CreatePublisherInput(input), nil
+	return database.CreatePublisherInput(input), nil
 }
 
 // UpdatePublisher is the resolver for the updatePublisher field.
 func (r *mutationResolver) UpdatePublisher(ctx context.Context, id string, input model.PublisherUpdateInput) (*model.Publisher, error) {
-	return db.UpdatePublisher(id, input), nil
+	return database.UpdatePublisher(id, input), nil
 }
 
 // DeletePublisher is the resolver for the deletePublisher field.
 func (r *mutationResolver) DeletePublisher(ctx context.Context, id string) (bool, error) {
-	err := db.DeletePublisher(id)
+	err := database.DeletePublisher(id)
 	if err != nil {
 		return false, nil
 	}
@@ -77,18 +75,18 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, username string, em
 		FullName: fullName,
 		Role:     role,
 	}
-	createdUser := db.CreateUser(newUser, password)
+	createdUser := database.CreateUser(newUser, password)
 	return createdUser, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input model.UserUpdateInput) (*model.User, error) {
-	return db.UpdateUser(id, input), nil
+	return database.UpdateUser(id, input), nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
-	err := db.DeleteUser(id)
+	err := database.DeleteUser(id)
 	if err != nil {
 		return false, nil
 	}
@@ -97,32 +95,32 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 
 // BorrowBook is the resolver for the borrowBook field.
 func (r *mutationResolver) BorrowBook(ctx context.Context, bookID string, userID string) (*model.BookBorrow, error) {
-	return db.BookBorrow(bookID, userID), nil
+	return database.BookBorrow(bookID, userID), nil
 }
 
 // UpdateBookBorrow is the resolver for the updateBookBorrow field.
 func (r *mutationResolver) UpdateBookBorrow(ctx context.Context, id string, input model.BookBorrowUpdateInput) (*model.BookBorrow, error) {
-	return db.UpdateBookBorrow(id, input), nil
+	return database.UpdateBookBorrow(id, input), nil
 }
 
 // ReturnBook is the resolver for the returnBook field.
 func (r *mutationResolver) ReturnBook(ctx context.Context, borrowID string) (*model.BookBorrow, error) {
-	return db.ReturnBook(borrowID), nil
+	return database.ReturnBook(borrowID), nil
 }
 
 // AddReview is the resolver for the addReview field.
 func (r *mutationResolver) AddReview(ctx context.Context, input model.ReviewInput) (*model.Review, error) {
-	return db.AddReview(input), nil
+	return database.AddReview(input), nil
 }
 
 // UpdateReview is the resolver for the updateReview field.
 func (r *mutationResolver) UpdateReview(ctx context.Context, id string, input model.ReviewUpdateInput) (*model.Review, error) {
-	return db.UpdateReview(id, input), nil
+	return database.UpdateReview(id, input), nil
 }
 
 // DeleteReview is the resolver for the deleteReview field.
 func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, error) {
-	err := db.DeleteReview(id)
+	err := database.DeleteReview(id)
 	if err != nil {
 		return false, nil
 	}
@@ -131,37 +129,37 @@ func (r *mutationResolver) DeleteReview(ctx context.Context, id string) (bool, e
 
 // Books is the resolver for the books field.
 func (r *queryResolver) Books(ctx context.Context, category *model.BookCategory, status *model.BookStatus, minRating *float64, tags []string, limit *int, offset *int) ([]*model.Book, error) {
-	return db.GetBooks(), nil
+	return database.GetBooks(), nil
 }
 
 // Book is the resolver for the book field.
 func (r *queryResolver) Book(ctx context.Context, id string) (*model.Book, error) {
-	return db.GetBook(id), nil
+	return database.GetBook(id), nil
 }
 
 // SearchBooks is the resolver for the searchBooks field.
 func (r *queryResolver) SearchBooks(ctx context.Context, query string) ([]*model.Book, error) {
-	return db.SearchBooks(query), nil
+	return database.SearchBooks(query), nil
 }
 
 // Authors is the resolver for the authors field.
 func (r *queryResolver) Authors(ctx context.Context, limit *int, offset *int) ([]*model.Author, error) {
-	return db.GetAuthours(), nil
+	return database.GetAuthours(), nil
 }
 
 // Author is the resolver for the author field.
 func (r *queryResolver) Author(ctx context.Context, id string) (*model.Author, error) {
-	return db.GetAuthour(id), nil
+	return database.GetAuthour(id), nil
 }
 
 // Publishers is the resolver for the publishers field.
 func (r *queryResolver) Publishers(ctx context.Context, limit *int, offset *int) ([]*model.Publisher, error) {
-	return db.GetPublishers(), nil
+	return database.GetPublishers(), nil
 }
 
 // Publisher is the resolver for the publisher field.
 func (r *queryResolver) Publisher(ctx context.Context, id string) (*model.Publisher, error) {
-	return db.GetPublisher(id), nil
+	return database.GetPublisher(id), nil
 }
 
 // CurrentUser is the resolver for the currentUser field.
@@ -172,12 +170,12 @@ func (r *queryResolver) CurrentUser(ctx context.Context) (*model.User, error) {
 		return nil, nil
 	}
 
-	return db.CurrentUser(userId), nil
+	return database.CurrentUser(userId), nil
 }
 
 // UserBorrows is the resolver for the userBorrows field.
 func (r *queryResolver) UserBorrows(ctx context.Context, userID string) ([]*model.BookBorrow, error) {
-	return db.UserBorrows(userID), nil
+	return database.UserBorrows(userID), nil
 }
 
 // OverdueBooks is the resolver for the overdueBooks field.
@@ -186,7 +184,7 @@ func (r *queryResolver) OverdueBooks(ctx context.Context) ([]*model.BookBorrow, 
 	if !ok {
 		return nil, nil
 	}
-	return db.OverdueBooks(userid), nil
+	return database.OverdueBooks(userid), nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -205,5 +203,5 @@ type queryResolver struct{ *Resolver }
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
 /*
-	var db = database.Connect()
+	var database = database.Connect()
 */

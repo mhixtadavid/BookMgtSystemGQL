@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,31 +16,38 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var connectionString string = "mongodb://127.0.0.1:27017"
+var DB *mongo.Database
 
-type DB struct {
-	client *mongo.Client
-}
+func Connect() (*mongo.Client, error) {
+	mongoURI := os.Getenv("MONGO_DB_URI")
+	if mongoURI == "" {
+		return nil, fmt.Errorf("MONGO_DB_URI is not set")
+	}
 
-func Connect() *DB {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	databaseName := os.Getenv("DATABASE")
+	if databaseName == "" {
+		return nil, fmt.Errorf("DATABASE name is not set")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(connectionString))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
-	err = client.Ping(ctx, readpref.Primary())
-	if err != nil {
-		panic(err)
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
-	return &DB{client: client}
+	DB = client.Database(databaseName)
+	fmt.Println("Successfully connected to the database")
+	return client, nil
 }
 
-func (db *DB) GetBooks() []*model.Book {
-	bookCollection := db.client.Database("BookMgtStore").Collection("Books")
+func GetBooks() []*model.Book {
+	bookCollection := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -56,8 +64,8 @@ func (db *DB) GetBooks() []*model.Book {
 	return bookListings
 }
 
-func (db *DB) GetBook(id string) *model.Book {
-	bookCollection := db.client.Database("BookMgtStore").Collection("Books")
+func GetBook(id string) *model.Book {
+	bookCollection := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -72,10 +80,10 @@ func (db *DB) GetBook(id string) *model.Book {
 	return &bookListing
 }
 
-func (db *DB) CreateBookInput(BookInfo model.BookInput) *model.Book {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
-	bookCollection := db.client.Database("BookMgtStore").Collection("Books")
+func CreateBookInput(BookInfo model.BookInput) *model.Book {
+	authorCollections := DB.Collection("Authors")
+	publisherCollections := DB.Collection("Publishers")
+	bookCollection := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -175,8 +183,8 @@ func (db *DB) CreateBookInput(BookInfo model.BookInput) *model.Book {
 	return &returnBook
 }
 
-func (db *DB) UpdateBook(BookId string, BookInfo model.BookUpdateInput) *model.Book {
-	bookCollection := db.client.Database("BookMgtStore").Collection("Books")
+func UpdateBook(BookId string, BookInfo model.BookUpdateInput) *model.Book {
+	bookCollection := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -239,8 +247,8 @@ func (db *DB) UpdateBook(BookId string, BookInfo model.BookUpdateInput) *model.B
 	return &bookListing
 }
 
-func (db *DB) DeleteBook(id string) error {
-	bookCollection := db.client.Database("BookMgtStore").Collection("Books")
+func DeleteBook(id string) error {
+	bookCollection := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -264,8 +272,8 @@ func (db *DB) DeleteBook(id string) error {
 	return nil
 }
 
-func (db *DB) GetAuthours() []*model.Author {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
+func GetAuthours() []*model.Author {
+	authorCollections := DB.Collection("Authors")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -282,8 +290,8 @@ func (db *DB) GetAuthours() []*model.Author {
 	return authorListings
 }
 
-func (db *DB) GetAuthour(id string) *model.Author {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
+func GetAuthour(id string) *model.Author {
+	authorCollections := DB.Collection("Authors")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -298,8 +306,8 @@ func (db *DB) GetAuthour(id string) *model.Author {
 	return &authorListing
 }
 
-func (db *DB) CreateAuthorInput(AuthorInfo model.AuthorInput) *model.Author {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
+func CreateAuthorInput(AuthorInfo model.AuthorInput) *model.Author {
+	authorCollections := DB.Collection("Authors")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -333,8 +341,8 @@ func (db *DB) CreateAuthorInput(AuthorInfo model.AuthorInput) *model.Author {
 	return &returnAuthor
 }
 
-func (db *DB) UpdateAuthor(AuthorId string, AuthorInfo model.AuthorUpdateInput) *model.Author {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
+func UpdateAuthor(AuthorId string, AuthorInfo model.AuthorUpdateInput) *model.Author {
+	authorCollections := DB.Collection("Authors")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -374,8 +382,8 @@ func (db *DB) UpdateAuthor(AuthorId string, AuthorInfo model.AuthorUpdateInput) 
 	return &authorListing
 }
 
-func (db *DB) DeleteAuthor(id string) *model.Author {
-	authorCollections := db.client.Database("BookMgtStore").Collection("Authors")
+func DeleteAuthor(id string) *model.Author {
+	authorCollections := DB.Collection("Authors")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -397,8 +405,8 @@ func (db *DB) DeleteAuthor(id string) *model.Author {
 	return &authorListing
 }
 
-func (db *DB) GetPublishers() []*model.Publisher {
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
+func GetPublishers() []*model.Publisher {
+	publisherCollections := DB.Collection("Publishers")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -415,8 +423,8 @@ func (db *DB) GetPublishers() []*model.Publisher {
 	return publisherListings
 }
 
-func (db *DB) GetPublisher(id string) *model.Publisher {
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
+func GetPublisher(id string) *model.Publisher {
+	publisherCollections := DB.Collection("Publishers")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -432,8 +440,8 @@ func (db *DB) GetPublisher(id string) *model.Publisher {
 	return &publisherListing
 }
 
-func (db *DB) CreatePublisherInput(PublisherInfo model.PublisherInput) *model.Publisher {
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
+func CreatePublisherInput(PublisherInfo model.PublisherInput) *model.Publisher {
+	publisherCollections := DB.Collection("Publishers")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -463,8 +471,8 @@ func (db *DB) CreatePublisherInput(PublisherInfo model.PublisherInput) *model.Pu
 	return &returnPublisher
 }
 
-func (db *DB) UpdatePublisher(Publisherid string, PublisherInfo model.PublisherUpdateInput) *model.Publisher {
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
+func UpdatePublisher(Publisherid string, PublisherInfo model.PublisherUpdateInput) *model.Publisher {
+	publisherCollections := DB.Collection("Publishers")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -500,8 +508,8 @@ func (db *DB) UpdatePublisher(Publisherid string, PublisherInfo model.PublisherU
 	return &publisherListing
 }
 
-func (db *DB) DeletePublisher(id string) *model.Publisher {
-	publisherCollections := db.client.Database("BookMgtStore").Collection("Publishers")
+func DeletePublisher(id string) *model.Publisher {
+	publisherCollections := DB.Collection("Publishers")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -520,8 +528,8 @@ func (db *DB) DeletePublisher(id string) *model.Publisher {
 	return &publisherListing
 }
 
-func (db *DB) CreateUser(UserInfo model.User, password string) *model.User {
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func CreateUser(UserInfo model.User, password string) *model.User {
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -574,8 +582,8 @@ func (db *DB) CreateUser(UserInfo model.User, password string) *model.User {
 	return &returnUser
 }
 
-func (db *DB) UpdateUser(UserId string, UserInfo model.UserUpdateInput) *model.User {
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func UpdateUser(UserId string, UserInfo model.UserUpdateInput) *model.User {
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -633,8 +641,8 @@ func (db *DB) UpdateUser(UserId string, UserInfo model.UserUpdateInput) *model.U
 	return &updatedUser
 }
 
-func (db *DB) DeleteUser(id string) *model.User {
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func DeleteUser(id string) *model.User {
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -665,10 +673,10 @@ func (db *DB) DeleteUser(id string) *model.User {
 	return &user
 }
 
-func (db *DB) AddReview(ReviewInfo model.ReviewInput) *model.Review {
-	ReviewCollections := db.client.Database("BookMgtStore").Collection("Reviews")
-	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func AddReview(ReviewInfo model.ReviewInput) *model.Review {
+	ReviewCollections := DB.Collection("Reviews")
+	BookCollections := DB.Collection("Books")
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -730,9 +738,9 @@ func (db *DB) AddReview(ReviewInfo model.ReviewInput) *model.Review {
 	return &returnReview
 }
 
-func (db *DB) UpdateReview(ReviewId string, ReviewInfo model.ReviewUpdateInput) *model.Review {
-	ReviewCollections := db.client.Database("BookMgtStore").Collection("Reviews")
-	bookCollections := db.client.Database("BookMgtStore").Collection("Books")
+func UpdateReview(ReviewId string, ReviewInfo model.ReviewUpdateInput) *model.Review {
+	ReviewCollections := DB.Collection("Reviews")
+	bookCollections := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -788,9 +796,9 @@ func (db *DB) UpdateReview(ReviewId string, ReviewInfo model.ReviewUpdateInput) 
 	return &updateReview
 }
 
-func (db *DB) DeleteReview(DeleteId string) *model.Review {
-	ReviewCollections := db.client.Database("BookMgtStore").Collection("Reviews")
-	bookCollections := db.client.Database("BookMgtStore").Collection("Books")
+func DeleteReview(DeleteId string) *model.Review {
+	ReviewCollections := DB.Collection("Reviews")
+	bookCollections := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -838,10 +846,10 @@ func (db *DB) DeleteReview(DeleteId string) *model.Review {
 	return &existingReview
 }
 
-// func (db *DB) BookBorrow(BookID string, UserID string) *model.BookBorrow {
-// 	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
-// 	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
-// 	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+// func BookBorrow(BookID string, UserID string) *model.BookBorrow {
+// 	BorrowCollections := DB.Collection("Borrow")
+// 	BookCollections := DB.Collection("Books")
+// 	UserCollections := DB.Collection("Users")
 // 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 // 	defer cancel()
 
@@ -940,10 +948,10 @@ func (db *DB) DeleteReview(DeleteId string) *model.Review {
 // 	return &returnBookBorrow
 // }
 
-func (db *DB) BookBorrow(BookID string, UserID string) *model.BookBorrow {
-	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
-	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func BookBorrow(BookID string, UserID string) *model.BookBorrow {
+	BorrowCollections := DB.Collection("Borrow")
+	BookCollections := DB.Collection("Books")
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -990,7 +998,12 @@ func (db *DB) BookBorrow(BookID string, UserID string) *model.BookBorrow {
 	}
 
 	// Start a session for the transaction
-	session, err := db.client.StartSession()
+	client, err := Connect()
+	if err != nil {
+		fmt.Println("Error connecting to MongoDB:", err)
+		return nil
+	}
+	session, err := client.StartSession()
 	if err != nil {
 		fmt.Println("Error starting session:", err)
 		return nil
@@ -1040,17 +1053,22 @@ func (db *DB) BookBorrow(BookID string, UserID string) *model.BookBorrow {
 	return &returnBookBorrow
 }
 
-func (db *DB) UpdateBookBorrow(BorrowID string, BookBorrowInput model.BookBorrowUpdateInput) *model.BookBorrow {
-	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
-	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func UpdateBookBorrow(BorrowID string, BookBorrowInput model.BookBorrowUpdateInput) *model.BookBorrow {
+	BorrowCollections := DB.Collection("Borrow")
+	BookCollections := DB.Collection("Books")
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	var bookBorrow model.BookBorrow
 	borrowFilter := bson.M{"_id": BorrowID}
 
-	session, err := db.client.StartSession()
+	client, err := Connect()
+	if err != nil {
+		fmt.Println("Error connecting to MongoDB:", err)
+		return nil
+	}
+	session, err := client.StartSession()
 	if err != nil {
 		return nil
 	}
@@ -1107,10 +1125,10 @@ func (db *DB) UpdateBookBorrow(BorrowID string, BookBorrowInput model.BookBorrow
 	return &bookBorrow
 }
 
-func (db *DB) ReturnBook(BorrowId string) *model.BookBorrow {
-	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
-	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func ReturnBook(BorrowId string) *model.BookBorrow {
+	BorrowCollections := DB.Collection("Borrow")
+	BookCollections := DB.Collection("Books")
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -1124,7 +1142,12 @@ func (db *DB) ReturnBook(BorrowId string) *model.BookBorrow {
 		return nil
 	}
 
-	session, err := db.client.StartSession()
+	client, err := Connect()
+	if err != nil {
+		fmt.Println("Error connecting to MongoDB:", err)
+		return nil
+	}
+	session, err := client.StartSession()
 	if err != nil {
 		return nil
 	}
@@ -1174,8 +1197,8 @@ func (db *DB) ReturnBook(BorrowId string) *model.BookBorrow {
 	return &returnBook
 }
 
-func (db *DB) SearchBooks(Search string) []*model.Book {
-	BookCollections := db.client.Database("BookMgtStore").Collection("Books")
+func SearchBooks(Search string) []*model.Book {
+	BookCollections := DB.Collection("Books")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -1214,8 +1237,8 @@ func (db *DB) SearchBooks(Search string) []*model.Book {
 	return books
 }
 
-func (db *DB) CurrentUser(userID string) *model.User {
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func CurrentUser(userID string) *model.User {
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -1229,9 +1252,9 @@ func (db *DB) CurrentUser(userID string) *model.User {
 	return &user
 }
 
-func (db *DB) UserBorrows(userID string) []*model.BookBorrow {
-	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
+func UserBorrows(userID string) []*model.BookBorrow {
+	BorrowCollections := DB.Collection("Borrow")
+	UserCollections := DB.Collection("Users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -1269,9 +1292,9 @@ func (db *DB) UserBorrows(userID string) []*model.BookBorrow {
 	return borrows
 }
 
-func (db *DB) OverdueBooks(UserID string) []*model.BookBorrow {
-	UserCollections := db.client.Database("BookMgtStore").Collection("Users")
-	BorrowCollections := db.client.Database("BookMgtStore").Collection("Borrow")
+func OverdueBooks(UserID string) []*model.BookBorrow {
+	UserCollections := DB.Collection("Users")
+	BorrowCollections := DB.Collection("Borrow")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
