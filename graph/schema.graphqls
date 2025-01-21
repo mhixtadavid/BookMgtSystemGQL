@@ -20,257 +20,291 @@ enum BookCategory {
   CHILDREN
 }
 
-enum BookStatus {
+enum BookAvailability {
   AVAILABLE
-  CHECKED_OUT
-  OUT_OF_PRINT
-  LOST
-  IN_REPAIR
+  RESERVED
+  BORROWED
+  SOLD_OUT
 }
 
 enum UserRole {
   READER
-  MEMBER
-  LIBRARIAN
   ADMIN
 }
 
-enum BorrowStatus {
-  BORROWED
-  RETURNED
-  OVERDUE
-  LOST
+type Query {
+  # User Authentication
+  currentUser: User!
+
+  # Home and Dashboard
+  featuredBooks: [Book!]!
+  recentlyViewedBooks: [Book!]!
+  searchBooks(query: String!): [Book!]!
+
+  # Book Management
+  bookDetails(id: ID!): Book!
+
+  # User Library
+  myLibrary: Library!
+  bookHistory: [BookHistory!]!
+
+  # Social and Community Features
+  bookReviews(bookId: ID!): [Review!]!
+  communityDiscussions: [Discussion!]!
+  userProfile: UserProfile!
+
+  # Notifications
+  notifications: [Notification!]!
+
+  # Admin Features (Optional)
+  adminDashboard: AdminDashboard!
+  userList: [User!]!
+  reports(filter: ReportFilterInput): [Report!]!
 }
 
-# Types
-type Author {
-  _id: ID!
-  name: String!
-  biography: String
-  birthDate: String
-  nationality: String
-  books: [Book!]
-  awards: [String!]
-  websiteURL: String
+type Mutation {
+  # User Authentication
+  login(email: String!, password: String!): AuthPayload!
+  signUp(input: SignUpInput!): AuthPayload!
+  recoverPassword(email: String!): Boolean!
+  resetPassword(otp: String!, newPassword: String!): Boolean!
+
+  # Book Management
+  addBook(input: AddBookInput!): Book!
+  editBook(id: ID!, input: EditBookInput!): Book!
+  deleteBook(id: ID!): Boolean!
+
+  # Book Interaction
+  borrowBook(bookId: ID!): BorrowReceipt!
+  reserveBook(bookId: ID!): ReserveReceipt!
+  purchaseBook(bookId: ID!, paymentDetails: PaymentInput!): PurchaseReceipt!
+  addBookmark(bookId: ID!, page: Int!): Bookmark!
+
+  # Social and Community Features
+  addReview(bookId: ID!, input: ReviewInput!): Review!
+  editReview(reviewId: ID!, input: ReviewInput!): Review!
+  deleteReview(reviewId: ID!): Boolean!
+  createDiscussion(input: DiscussionInput!): Discussion!
+  replyToDiscussion(discussionId: ID!, content: String!): Discussion!
+
+  # Settings and Account Management
+  updateProfile(input: UpdateProfileInput!): UserProfile!
+  changePassword(currentPassword: String!, newPassword: String!): Boolean!
+  updateNotificationSettings(input: NotificationSettingsInput!): NotificationSettings!
 }
 
-type Publisher {
-  _id: ID!
+# Types and Inputs
+
+type User {
+  id: ID!
   name: String!
-  foundedYear: Int
-  location: String
-  books: [Book!]
-  websiteURL: String
+  email: String!
+  password: String!
+  favoriteGenres: [BookCategory]
+  activityStats: UserActivityStats
+  role: UserRole!
+}
+
+type UserActivityStats {
+  booksBorrowed: Int
+  reviewsWritten: Int
+}
+
+input SignUpInput {
+  name: String!
+  email: String!
+  password: String!
+  favoriteGenres: [BookCategory]
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
 }
 
 type Book {
-  _id: ID!
-  isbn: String
+  id: ID!
   title: String!
-  description: String
-  publishedYear: Int
-  pageCount: Int
-  language: String
+  author: String!
+  category: BookCategory!
+  description: String!
+  isbn: String!
+  coverImage: String!
+  availability: BookAvailability!
+  rating: Float!
+  reviews: [Review]
+}
+
+type Library {
+  borrowedBooks: [Book]
+  reservedBooks: [Book]
+  purchasedBooks: [Book]
+  favoriteBooks: [Book]
+}
+
+type BookHistory {
+  book: Book
+  borrowedDate: String
+  returnedDate: String
+}
+
+input AddBookInput {
+  title: String!
+  author: String!
+  category: BookCategory!
+  description: String!
+  isbn: String!
+  coverImage: String!
+}
+
+input EditBookInput {
+  title: String
+  author: String
   category: BookCategory
-  status: BookStatus
-  authors: [Author!]!
-  publisher: Publisher
-  price: Float
-  discountPercentage: Float
-  totalCopies: Int
-  availableCopies: Int
-  coverImageURL: String
-  tags: [String!]
-  averageRating: Float
-  totalRatings: Int
+  description: String
+  isbn: String
+  coverImage: String
+}
+
+type BorrowReceipt {
+  book: Book!
+  dueDate: String!
+}
+
+type ReserveReceipt {
+  book: Book!
+  reservationDate: String!
+}
+
+type PurchaseReceipt {
+  book: Book!
+  price: Float!
+  paymentDetails: PaymentDetails!
+}
+
+input PaymentInput {
+  method: String!
+  cardNumber: String
+  expiryDate: String
+  cvv: String
+}
+
+type PaymentDetails {
+  method: String!
+  transactionId: String!
+}
+
+type Bookmark {
+  book: Book!
+  page: Int!
 }
 
 type Review {
-  _id: ID!
-  book: Book!
+  id: ID!
   user: User!
-  rating: Int!
-  reviewText: String
-  reviewDate: String!
-}
-
-type User {
-  _id: ID!
-  username: String!
-  email: String!
-  fullName: String
-  registrationDate: String!
-  role: UserRole!
-  reviews: [Review!]
-  borrowedBooks: [BookBorrow!]
-}
-
-type BookBorrow {
-  _id: ID!
   book: Book!
-  user: User!
-  borrowDate: String!
-  dueDate: String!
-  returnDate: String
-  status: BorrowStatus!
-}
-
-# Input types for creation
-input BookInput {
-  title: String!
-  isbn: String
-  description: String
-  publishedYear: Int
-  pageCount: Int
-  language: String
-  category: BookCategory
-  authorIds: [ID!]
-  publisherId: ID
-  price: Float
-  discountPercentage: Float
-  totalCopies: Int
-  coverImageURL: String
-  tags: [String!]
-}
-
-input AuthorInput {
-  name: String!
-  biography: String
-  birthDate: String
-  nationality: String
-  awards: [String!]
-  websiteURL: String
-}
-
-input PublisherInput {
-  name: String!
-  foundedYear: Int
-  location: String
-  websiteURL: String
+  rating: Float!
+  content: String
+  createdAt: String
 }
 
 input ReviewInput {
-  bookId: ID!
-  userID: ID!
-  rating: Int!
-  reviewText: String
+  rating: Float!
+  content: String
 }
 
-# Input types for updates
-input BookUpdateInput {
-  title: String
-  isbn: String
-  description: String
-  publishedYear: Int
-  pageCount: Int
-  language: String
+type Discussion {
+  id: ID!
+  title: String!
+  category: String!
+  replies: [DiscussionReply]
+  createdAt: String
+  createdBy: User!
+}
+
+type DiscussionReply {
+  id: ID!
+  content: String!
+  createdAt: String
+  createdBy: User!
+}
+
+input DiscussionInput {
+  title: String!
+  category: String!
+  content: String!
+}
+
+type Notification {
+  id: ID!
+  type: String!
+  message: String!
+  createdAt: String
+  read: Boolean
+}
+
+type NotificationSettings {
+  dueDateReminders: Boolean
+  newArrivals: Boolean
+  communityActivity: Boolean
+}
+
+input NotificationSettingsInput {
+  dueDateReminders: Boolean
+  newArrivals: Boolean
+  communityActivity: Boolean
+}
+
+type AdminDashboard {
+  totalBooks: Int
+  totalUsers: Int
+  borrowStats: BorrowStats
+}
+
+type BorrowStats {
+  daily: Int
+  weekly: Int
+  monthly: Int
+}
+
+input ReportFilterInput {
+  dateRange: DateRangeInput
   category: BookCategory
-  status: BookStatus
-  authorIds: [ID!]
-  publisherId: ID
-  price: Float
-  discountPercentage: Float
-  totalCopies: Int
-  coverImageURL: String
-  tags: [String!]
+  userActivity: String
 }
 
-input AuthorUpdateInput {
+input DateRangeInput {
+  startDate: String!
+  endDate: String!
+}
+
+type Report {
+  id: ID!
+  title: String!
+  generatedAt: String!
+  data: String!
+}
+
+type Admin {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+input AdminInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+type UserProfile {
+  user: User!
+  favoriteGenres: [BookCategory]
+  activityStats: UserActivityStats
+}
+
+input UpdateProfileInput {
   name: String
-  biography: String
-  birthDate: String
-  nationality: String
-  awards: [String!]
-  websiteURL: String
-}
-
-input PublisherUpdateInput {
-  name: String
-  foundedYear: Int
-  location: String
-  websiteURL: String
-}
-
-input ReviewUpdateInput {
-  rating: Int
-  reviewText: String
-}
-
-
-input UserUpdateInput {
-  username: String
   email: String
-  fullName: String
-  currentPassword: String
-  newPassword: String
-  role: UserRole
-}
-
-input BookBorrowUpdateInput {
-  dueDate: String
-  returnDate: String
-  status: BorrowStatus
-}
-
-# Queries
-type Query {
-  books(
-    category: BookCategory
-    status: BookStatus
-    minRating: Float
-    tags: [String!]
-    limit: Int = 10
-    offset: Int = 0
-  ): [Book!]!
-  book(id: ID!): Book
-  searchBooks(query: String!): [Book!]!
-  
-  authors(limit: Int = 10, offset: Int = 0): [Author!]!
-  author(id: ID!): Author
-  
-  publishers(limit: Int = 10, offset: Int = 0): [Publisher!]!
-  publisher(id: ID!): Publisher
-  
-  currentUser: User
-  userBorrows(userId: ID!): [BookBorrow!]!
-  overdueBooks: [BookBorrow!]!
-}
-
-# Mutations
-type Mutation {
-  # Book mutations
-  createBook(input: BookInput!): Book!
-  updateBook(id: ID!, input: BookUpdateInput!): Book!
-  deleteBook(id: ID!): Boolean!
-
-  # Author mutations
-  createAuthor(input: AuthorInput!): Author!
-  updateAuthor(id: ID!, input: AuthorUpdateInput!): Author!
-  deleteAuthor(id: ID!): Boolean!
-
-  # Publisher mutations
-  createPublisher(input: PublisherInput!): Publisher!
-  updatePublisher(id: ID!, input: PublisherUpdateInput!): Publisher!
-  deletePublisher(id: ID!): Boolean!
-
-  # User mutations
-  registerUser(
-    username: String!
-    email: String!
-    password: String!
-    fullName: String
-    role: UserRole!
-  ): User!
-  updateUser(id: ID!, input: UserUpdateInput!): User!
-  deleteUser(id: ID!): Boolean!
-
-  # BookBorrow mutations
-  borrowBook(bookId: ID!, userId: ID!): BookBorrow!
-  updateBookBorrow(id: ID!, input: BookBorrowUpdateInput!): BookBorrow!
-  returnBook(borrowId: ID!): BookBorrow!
-
-  # Review mutations
-  addReview(input: ReviewInput!): Review!
-  updateReview(id: ID!, input: ReviewUpdateInput!): Review!
-  deleteReview(id: ID!): Boolean!
+  favoriteGenres: [BookCategory]
 }

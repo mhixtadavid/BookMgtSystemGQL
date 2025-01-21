@@ -6,180 +6,271 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-
 )
 
-type Author struct {
-	ID          string   `json:"_id"`
-	Name        string   `json:"name"`
-	Biography   *string  `json:"biography,omitempty"`
-	BirthDate   *string  `json:"birthDate,omitempty"`
-	Nationality *string  `json:"nationality,omitempty"`
-	Books       []*Book  `json:"books,omitempty"`
-	Awards      []string `json:"awards,omitempty"`
-	WebsiteURL  *string  `json:"websiteURL,omitempty"`
+type AddBookInput struct {
+	Title       string       `json:"title"`
+	Author      string       `json:"author"`
+	Category    BookCategory `json:"category"`
+	Description string       `json:"description"`
+	Isbn        string       `json:"isbn"`
+	CoverImage  string       `json:"coverImage"`
 }
 
-type AuthorInput struct {
-	Name        string   `json:"name"`
-	Biography   *string  `json:"biography,omitempty"`
-	BirthDate   *string  `json:"birthDate,omitempty"`
-	Nationality *string  `json:"nationality,omitempty"`
-	Awards      []string `json:"awards,omitempty"`
-	WebsiteURL  *string  `json:"websiteURL,omitempty"`
+type Admin struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
-type AuthorUpdateInput struct {
-	Name        *string  `json:"name,omitempty"`
-	Biography   *string  `json:"biography,omitempty"`
-	BirthDate   *string  `json:"birthDate,omitempty"`
-	Nationality *string  `json:"nationality,omitempty"`
-	Awards      []string `json:"awards,omitempty"`
-	WebsiteURL  *string  `json:"websiteURL,omitempty"`
+type AdminDashboard struct {
+	TotalBooks  *int         `json:"totalBooks,omitempty"`
+	TotalUsers  *int         `json:"totalUsers,omitempty"`
+	BorrowStats *BorrowStats `json:"borrowStats,omitempty"`
+}
+
+type AdminInput struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthPayload struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
 }
 
 type Book struct {
-	ID                 string        `json:"_id"`
-	Isbn               *string       `json:"isbn,omitempty"`
-	Title              string        `json:"title"`
-	Description        *string       `json:"description,omitempty"`
-	PublishedYear      *int          `json:"publishedYear,omitempty"`
-	PageCount          *int          `json:"pageCount,omitempty"`
-	Language           *string       `json:"language,omitempty"`
-	Category           *BookCategory `json:"category,omitempty"`
-	Status             *BookStatus   `json:"status,omitempty"`
-	Authors            []*Author     `json:"authors"`
-	Publisher          *Publisher    `json:"publisher,omitempty"`
-	Price              *float64      `json:"price,omitempty"`
-	DiscountPercentage *float64      `json:"discountPercentage,omitempty"`
-	TotalCopies        *int          `json:"totalCopies,omitempty"`
-	AvailableCopies    *int          `json:"availableCopies,omitempty"`
-	CoverImageURL      *string       `json:"coverImageURL,omitempty"`
-	Tags               []string      `json:"tags,omitempty"`
-	AverageRating      *float64      `json:"averageRating,omitempty"`
-	TotalRatings       *int          `json:"totalRatings,omitempty"`
+	ID           string           `json:"id"`
+	Title        string           `json:"title"`
+	Author       string           `json:"author"`
+	Category     BookCategory     `json:"category"`
+	Description  string           `json:"description"`
+	Isbn         string           `json:"isbn"`
+	CoverImage   string           `json:"coverImage"`
+	Availability BookAvailability `json:"availability"`
+	Rating       float64          `json:"rating"`
+	Reviews      []*Review        `json:"reviews,omitempty"`
 }
 
-type BookBorrow struct {
-	ID         string       `json:"_id"`
-	Book       *Book        `json:"book"`
-	User       *User        `json:"user"`
-	BorrowDate string       `json:"borrowDate"`
-	DueDate    string       `json:"dueDate"`
-	ReturnDate *string      `json:"returnDate,omitempty"`
-	Status     BorrowStatus `json:"status"`
+type BookHistory struct {
+	Book         *Book   `json:"book,omitempty"`
+	BorrowedDate *string `json:"borrowedDate,omitempty"`
+	ReturnedDate *string `json:"returnedDate,omitempty"`
 }
 
-type BookBorrowUpdateInput struct {
-	DueDate    *string       `json:"dueDate,omitempty"`
-	ReturnDate *string       `json:"returnDate,omitempty"`
-	Status     *BorrowStatus `json:"status,omitempty"`
+type Bookmark struct {
+	Book *Book `json:"book"`
+	Page int   `json:"page"`
 }
 
-type BookInput struct {
-	Title              string        `json:"title"`
-	Isbn               *string       `json:"isbn,omitempty"`
-	Description        *string       `json:"description,omitempty"`
-	PublishedYear      *int          `json:"publishedYear,omitempty"`
-	PageCount          *int          `json:"pageCount,omitempty"`
-	Language           *string       `json:"language,omitempty"`
-	Category           *BookCategory `json:"category,omitempty"`
-	AuthorIds          []string      `json:"authorIds,omitempty"`
-	PublisherID        *string       `json:"publisherId,omitempty"`
-	Price              *float64      `json:"price,omitempty"`
-	DiscountPercentage *float64      `json:"discountPercentage,omitempty"`
-	TotalCopies        *int          `json:"totalCopies,omitempty"`
-	CoverImageURL      *string       `json:"coverImageURL,omitempty"`
-	Tags               []string      `json:"tags,omitempty"`
+type BorrowReceipt struct {
+	Book    *Book  `json:"book"`
+	DueDate string `json:"dueDate"`
 }
 
-type BookUpdateInput struct {
-	Title              *string       `json:"title,omitempty"`
-	Isbn               *string       `json:"isbn,omitempty"`
-	Description        *string       `json:"description,omitempty"`
-	PublishedYear      *int          `json:"publishedYear,omitempty"`
-	PageCount          *int          `json:"pageCount,omitempty"`
-	Language           *string       `json:"language,omitempty"`
-	Category           *BookCategory `json:"category,omitempty"`
-	Status             *BookStatus   `json:"status,omitempty"`
-	AuthorIds          []string      `json:"authorIds,omitempty"`
-	PublisherID        *string       `json:"publisherId,omitempty"`
-	Price              *float64      `json:"price,omitempty"`
-	DiscountPercentage *float64      `json:"discountPercentage,omitempty"`
-	TotalCopies        *int          `json:"totalCopies,omitempty"`
-	CoverImageURL      *string       `json:"coverImageURL,omitempty"`
-	Tags               []string      `json:"tags,omitempty"`
+type BorrowStats struct {
+	Daily   *int `json:"daily,omitempty"`
+	Weekly  *int `json:"weekly,omitempty"`
+	Monthly *int `json:"monthly,omitempty"`
+}
+
+type DateRangeInput struct {
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
+}
+
+type Discussion struct {
+	ID        string             `json:"id"`
+	Title     string             `json:"title"`
+	Category  string             `json:"category"`
+	Replies   []*DiscussionReply `json:"replies,omitempty"`
+	CreatedAt *string            `json:"createdAt,omitempty"`
+	CreatedBy *User              `json:"createdBy"`
+}
+
+type DiscussionInput struct {
+	Title    string `json:"title"`
+	Category string `json:"category"`
+	Content  string `json:"content"`
+}
+
+type DiscussionReply struct {
+	ID        string  `json:"id"`
+	Content   string  `json:"content"`
+	CreatedAt *string `json:"createdAt,omitempty"`
+	CreatedBy *User   `json:"createdBy"`
+}
+
+type EditBookInput struct {
+	Title       *string       `json:"title,omitempty"`
+	Author      *string       `json:"author,omitempty"`
+	Category    *BookCategory `json:"category,omitempty"`
+	Description *string       `json:"description,omitempty"`
+	Isbn        *string       `json:"isbn,omitempty"`
+	CoverImage  *string       `json:"coverImage,omitempty"`
+}
+
+type Library struct {
+	BorrowedBooks  []*Book `json:"borrowedBooks,omitempty"`
+	ReservedBooks  []*Book `json:"reservedBooks,omitempty"`
+	PurchasedBooks []*Book `json:"purchasedBooks,omitempty"`
+	FavoriteBooks  []*Book `json:"favoriteBooks,omitempty"`
 }
 
 type Mutation struct {
 }
 
-type Publisher struct {
-	ID          string  `json:"_id"`
-	Name        string  `json:"name"`
-	FoundedYear *int    `json:"foundedYear,omitempty"`
-	Location    *string `json:"location,omitempty"`
-	Books       []*Book `json:"books,omitempty"`
-	WebsiteURL  *string `json:"websiteURL,omitempty"`
+type Notification struct {
+	ID        string  `json:"id"`
+	Type      string  `json:"type"`
+	Message   string  `json:"message"`
+	CreatedAt *string `json:"createdAt,omitempty"`
+	Read      *bool   `json:"read,omitempty"`
 }
 
-type PublisherInput struct {
-	Name        string  `json:"name"`
-	FoundedYear *int    `json:"foundedYear,omitempty"`
-	Location    *string `json:"location,omitempty"`
-	WebsiteURL  *string `json:"websiteURL,omitempty"`
+type NotificationSettings struct {
+	DueDateReminders  *bool `json:"dueDateReminders,omitempty"`
+	NewArrivals       *bool `json:"newArrivals,omitempty"`
+	CommunityActivity *bool `json:"communityActivity,omitempty"`
 }
 
-type PublisherUpdateInput struct {
-	Name        *string `json:"name,omitempty"`
-	FoundedYear *int    `json:"foundedYear,omitempty"`
-	Location    *string `json:"location,omitempty"`
-	WebsiteURL  *string `json:"websiteURL,omitempty"`
+type NotificationSettingsInput struct {
+	DueDateReminders  *bool `json:"dueDateReminders,omitempty"`
+	NewArrivals       *bool `json:"newArrivals,omitempty"`
+	CommunityActivity *bool `json:"communityActivity,omitempty"`
+}
+
+type PaymentDetails struct {
+	Method        string `json:"method"`
+	TransactionID string `json:"transactionId"`
+}
+
+type PaymentInput struct {
+	Method     string  `json:"method"`
+	CardNumber *string `json:"cardNumber,omitempty"`
+	ExpiryDate *string `json:"expiryDate,omitempty"`
+	Cvv        *string `json:"cvv,omitempty"`
+}
+
+type PurchaseReceipt struct {
+	Book           *Book           `json:"book"`
+	Price          float64         `json:"price"`
+	PaymentDetails *PaymentDetails `json:"paymentDetails"`
 }
 
 type Query struct {
 }
 
+type Report struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	GeneratedAt string `json:"generatedAt"`
+	Data        string `json:"data"`
+}
+
+type ReportFilterInput struct {
+	DateRange    *DateRangeInput `json:"dateRange,omitempty"`
+	Category     *BookCategory   `json:"category,omitempty"`
+	UserActivity *string         `json:"userActivity,omitempty"`
+}
+
+type ReserveReceipt struct {
+	Book            *Book  `json:"book"`
+	ReservationDate string `json:"reservationDate"`
+}
+
 type Review struct {
-	ID         string  `json:"_id"`
-	Book       *Book   `json:"book"`
-	User       *User   `json:"user"`
-	Rating     int     `json:"rating"`
-	ReviewText *string `json:"reviewText,omitempty"`
-	ReviewDate string  `json:"reviewDate"`
+	ID        string  `json:"id"`
+	User      *User   `json:"user"`
+	Book      *Book   `json:"book"`
+	Rating    float64 `json:"rating"`
+	Content   *string `json:"content,omitempty"`
+	CreatedAt *string `json:"createdAt,omitempty"`
 }
 
 type ReviewInput struct {
-	BookID     string  `json:"bookId"`
-	UserID     string  `json:"userID"`
-	Rating     int     `json:"rating"`
-	ReviewText *string `json:"reviewText,omitempty"`
+	Rating  float64 `json:"rating"`
+	Content *string `json:"content,omitempty"`
 }
 
-type ReviewUpdateInput struct {
-	Rating     *int    `json:"rating,omitempty"`
-	ReviewText *string `json:"reviewText,omitempty"`
+type SignUpInput struct {
+	Name           string          `json:"name"`
+	Email          string          `json:"email"`
+	Password       string          `json:"password"`
+	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty"`
+}
+
+type UpdateProfileInput struct {
+	Name           *string         `json:"name,omitempty"`
+	Email          *string         `json:"email,omitempty"`
+	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty"`
 }
 
 type User struct {
-	ID               string        `json:"_id"`
-	Username         string        `json:"username"`
-	Email            string        `json:"email"`
-	FullName         *string       `json:"fullName,omitempty"`
-	RegistrationDate string        `json:"registrationDate"`
-	Role             UserRole      `json:"role"`
-	Reviews          []*Review     `json:"reviews,omitempty"`
-	BorrowedBooks    []*BookBorrow `json:"borrowedBooks,omitempty"`
-	HashedPassword   string        `json:"-"`
+	ID             string             `json:"id"`
+	Name           string             `json:"name"`
+	Email          string             `json:"email"`
+	Password       string             `json:"password"`
+	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty"`
+	ActivityStats  *UserActivityStats `json:"activityStats,omitempty"`
+	Role           UserRole           `json:"role"`
 }
 
-type UserUpdateInput struct {
-	Username        *string   `json:"username,omitempty"`
-	Email           *string   `json:"email,omitempty"`
-	FullName        *string   `json:"fullName,omitempty"`
-	CurrentPassword *string   `json:"currentPassword,omitempty"`
-	NewPassword     *string   `json:"newPassword,omitempty"`
-	Role            *UserRole `json:"role,omitempty"`
+type UserActivityStats struct {
+	BooksBorrowed  *int `json:"booksBorrowed,omitempty"`
+	ReviewsWritten *int `json:"reviewsWritten,omitempty"`
+}
+
+type UserProfile struct {
+	User           *User              `json:"user"`
+	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty"`
+	ActivityStats  *UserActivityStats `json:"activityStats,omitempty"`
+}
+
+type BookAvailability string
+
+const (
+	BookAvailabilityAvailable BookAvailability = "AVAILABLE"
+	BookAvailabilityReserved  BookAvailability = "RESERVED"
+	BookAvailabilityBorrowed  BookAvailability = "BORROWED"
+	BookAvailabilitySoldOut   BookAvailability = "SOLD_OUT"
+)
+
+var AllBookAvailability = []BookAvailability{
+	BookAvailabilityAvailable,
+	BookAvailabilityReserved,
+	BookAvailabilityBorrowed,
+	BookAvailabilitySoldOut,
+}
+
+func (e BookAvailability) IsValid() bool {
+	switch e {
+	case BookAvailabilityAvailable, BookAvailabilityReserved, BookAvailabilityBorrowed, BookAvailabilitySoldOut:
+		return true
+	}
+	return false
+}
+
+func (e BookAvailability) String() string {
+	return string(e)
+}
+
+func (e *BookAvailability) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BookAvailability(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BookAvailability", str)
+	}
+	return nil
+}
+
+func (e BookAvailability) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type BookCategory string
@@ -243,117 +334,21 @@ func (e BookCategory) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type BookStatus string
-
-const (
-	BookStatusAvailable  BookStatus = "AVAILABLE"
-	BookStatusCheckedOut BookStatus = "CHECKED_OUT"
-	BookStatusOutOfPrint BookStatus = "OUT_OF_PRINT"
-	BookStatusLost       BookStatus = "LOST"
-	BookStatusInRepair   BookStatus = "IN_REPAIR"
-)
-
-var AllBookStatus = []BookStatus{
-	BookStatusAvailable,
-	BookStatusCheckedOut,
-	BookStatusOutOfPrint,
-	BookStatusLost,
-	BookStatusInRepair,
-}
-
-func (e BookStatus) IsValid() bool {
-	switch e {
-	case BookStatusAvailable, BookStatusCheckedOut, BookStatusOutOfPrint, BookStatusLost, BookStatusInRepair:
-		return true
-	}
-	return false
-}
-
-func (e BookStatus) String() string {
-	return string(e)
-}
-
-func (e *BookStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = BookStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid BookStatus", str)
-	}
-	return nil
-}
-
-func (e BookStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type BorrowStatus string
-
-const (
-	BorrowStatusBorrowed BorrowStatus = "BORROWED"
-	BorrowStatusReturned BorrowStatus = "RETURNED"
-	BorrowStatusOverdue  BorrowStatus = "OVERDUE"
-	BorrowStatusLost     BorrowStatus = "LOST"
-)
-
-var AllBorrowStatus = []BorrowStatus{
-	BorrowStatusBorrowed,
-	BorrowStatusReturned,
-	BorrowStatusOverdue,
-	BorrowStatusLost,
-}
-
-func (e BorrowStatus) IsValid() bool {
-	switch e {
-	case BorrowStatusBorrowed, BorrowStatusReturned, BorrowStatusOverdue, BorrowStatusLost:
-		return true
-	}
-	return false
-}
-
-func (e BorrowStatus) String() string {
-	return string(e)
-}
-
-func (e *BorrowStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = BorrowStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid BorrowStatus", str)
-	}
-	return nil
-}
-
-func (e BorrowStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type UserRole string
 
 const (
-	UserRoleReader    UserRole = "READER"
-	UserRoleMember    UserRole = "MEMBER"
-	UserRoleLibrarian UserRole = "LIBRARIAN"
-	UserRoleAdmin     UserRole = "ADMIN"
+	UserRoleReader UserRole = "READER"
+	UserRoleAdmin  UserRole = "ADMIN"
 )
 
 var AllUserRole = []UserRole{
 	UserRoleReader,
-	UserRoleMember,
-	UserRoleLibrarian,
 	UserRoleAdmin,
 }
 
 func (e UserRole) IsValid() bool {
 	switch e {
-	case UserRoleReader, UserRoleMember, UserRoleLibrarian, UserRoleAdmin:
+	case UserRoleReader, UserRoleAdmin:
 		return true
 	}
 	return false
