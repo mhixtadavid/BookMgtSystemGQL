@@ -55,9 +55,9 @@ func IsIntrospectionQuery(query string) bool {
 // IsPublicOperation checks if the operation is public
 func IsPublicOperation(req *GraphQLRequest) bool {
 	publicOperations := map[string]struct{}{
-		"login":      {},
-		"register":   {},
-		"createuser": {},
+		"login":    {},
+		"register": {},
+		"signup":   {},
 	}
 
 	operationName := strings.ToLower(req.OperationName)
