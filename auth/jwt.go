@@ -16,7 +16,7 @@ var (
 
 // Claims with role
 type Claims struct {
-	UserID   string `json:"userId" bson:"userId"`
+	UserID   string `json:"userId" bson:"_id"`
 	UserRole string `json:"userRole" bson:"userRole"`
 	jwt.RegisteredClaims
 }

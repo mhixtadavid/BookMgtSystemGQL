@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bmsgql/auth"
 	"bmsgql/database"
 	"bmsgql/graph"
 	"log"
@@ -36,7 +37,8 @@ func main() {
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
-	http.Handle("/graphql", enableCORS(srv))
+	authMiddleware := auth.AuthMiddleware(srv)
+	http.Handle("/graphql", enableCORS(authMiddleware))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

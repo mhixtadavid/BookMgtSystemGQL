@@ -9,223 +9,223 @@ import (
 )
 
 type AddBookInput struct {
-	Title       string       `json:"title"`
-	Author      string       `json:"author"`
-	Category    BookCategory `json:"category"`
-	Description string       `json:"description"`
-	Isbn        string       `json:"isbn"`
-	CoverImage  string       `json:"coverImage"`
+	Title       string       `json:"title" bson:"title"`
+	Author      string       `json:"author" bson:"author"`
+	Category    BookCategory `json:"category" bson:"category"`
+	Description string       `json:"description" bson:"description"`
+	Isbn        string       `json:"isbn" bson:"isbn"`
+	CoverImage  string       `json:"coverImage" bson:"coverImage"`
 }
 
 type Admin struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID    string `json:"id" bson:"_id"`
+	Name  string `json:"name" bson:"name"`
+	Email string `json:"email" bson:"email"`
 }
 
 type AdminDashboard struct {
-	TotalBooks  *int         `json:"totalBooks,omitempty"`
-	TotalUsers  *int         `json:"totalUsers,omitempty"`
-	BorrowStats *BorrowStats `json:"borrowStats,omitempty"`
+	TotalBooks  *int         `json:"totalBooks,omitempty" bson:"totalBooks"`
+	TotalUsers  *int         `json:"totalUsers,omitempty" bson:"totalUsers"`
+	BorrowStats *BorrowStats `json:"borrowStats,omitempty" bson:"borrowStats"`
 }
 
 type AdminInput struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" bson:"name"`
+	Email    string `json:"email" bson:"email"`
+	Password string `json:"password" bson:"password"`
 }
 
 type AuthPayload struct {
-	Token string `json:"token"`
-	User  *User  `json:"user"`
+	Token string `json:"token" bson:"token"`
+	User  *User  `json:"user" bson:"user"`
 }
 
 type Book struct {
-	ID           string           `json:"id"`
-	Title        string           `json:"title"`
-	Author       string           `json:"author"`
-	Category     BookCategory     `json:"category"`
-	Description  string           `json:"description"`
-	Isbn         string           `json:"isbn"`
-	CoverImage   string           `json:"coverImage"`
-	Availability BookAvailability `json:"availability"`
-	Rating       float64          `json:"rating"`
-	Reviews      []*Review        `json:"reviews,omitempty"`
+	ID           string           `json:"id" bson:"_id"`
+	Title        string           `json:"title" bson:"title"`
+	Author       string           `json:"author" bson:"author"`
+	Category     BookCategory     `json:"category" bson:"category"`
+	Description  string           `json:"description" bson:"description"`
+	Isbn         string           `json:"isbn" bson:"isbn"`
+	CoverImage   string           `json:"coverImage" bson:"coverImage"`
+	Availability BookAvailability `json:"availability" bson:"availability"`
+	Rating       float64          `json:"rating" bson:"rating"`
+	Reviews      []*Review        `json:"reviews,omitempty" bson:"reviews"`
 }
 
 type BookHistory struct {
-	Book         *Book   `json:"book,omitempty"`
-	BorrowedDate *string `json:"borrowedDate,omitempty"`
-	ReturnedDate *string `json:"returnedDate,omitempty"`
+	Book         *Book   `json:"book,omitempty" bson:"book"`
+	BorrowedDate *string `json:"borrowedDate,omitempty" bson:"borrowedDate"`
+	ReturnedDate *string `json:"returnedDate,omitempty" bson:"returnedDate"`
 }
 
 type Bookmark struct {
-	Book *Book `json:"book"`
-	Page int   `json:"page"`
+	Book *Book `json:"book" bson:"book"`
+	Page int   `json:"page" bson:"page"`
 }
 
 type BorrowReceipt struct {
-	Book    *Book  `json:"book"`
-	DueDate string `json:"dueDate"`
+	Book    *Book  `json:"book" bson:"book"`
+	DueDate string `json:"dueDate" bson:"dueDate"`
 }
 
 type BorrowStats struct {
-	Daily   *int `json:"daily,omitempty"`
-	Weekly  *int `json:"weekly,omitempty"`
-	Monthly *int `json:"monthly,omitempty"`
+	Daily   *int `json:"daily,omitempty" bson:"daily"`
+	Weekly  *int `json:"weekly,omitempty" bson:"weekly"`
+	Monthly *int `json:"monthly,omitempty" bson:"monthly"`
 }
 
 type DateRangeInput struct {
-	StartDate string `json:"startDate"`
-	EndDate   string `json:"endDate"`
+	StartDate string `json:"startDate" bson:"startDate"`
+	EndDate   string `json:"endDate" bson:"endDate"`
 }
 
 type Discussion struct {
-	ID        string             `json:"id"`
-	Title     string             `json:"title"`
-	Category  string             `json:"category"`
-	Replies   []*DiscussionReply `json:"replies,omitempty"`
-	CreatedAt *string            `json:"createdAt,omitempty"`
-	CreatedBy *User              `json:"createdBy"`
+	ID        string             `json:"id" bson:"_id"`
+	Title     string             `json:"title" bson:"title"`
+	Category  string             `json:"category" bson:"category"`
+	Replies   []*DiscussionReply `json:"replies,omitempty" bson:"replies"`
+	CreatedAt *string            `json:"createdAt,omitempty" bson:"createdAt"`
+	CreatedBy *User              `json:"createdBy" bson:"createdBy"`
 }
 
 type DiscussionInput struct {
-	Title    string `json:"title"`
-	Category string `json:"category"`
-	Content  string `json:"content"`
+	Title    string `json:"title" bson:"title"`
+	Category string `json:"category" bson:"category"`
+	Content  string `json:"content" bson:"content"`
 }
 
 type DiscussionReply struct {
-	ID        string  `json:"id"`
-	Content   string  `json:"content"`
-	CreatedAt *string `json:"createdAt,omitempty"`
-	CreatedBy *User   `json:"createdBy"`
+	ID        string  `json:"id" bson:"_id"`
+	Content   string  `json:"content" bson:"content"`
+	CreatedAt *string `json:"createdAt,omitempty" bson:"createdAt"`
+	CreatedBy *User   `json:"createdBy" bson:"createdBy"`
 }
 
 type EditBookInput struct {
-	Title       *string       `json:"title,omitempty"`
-	Author      *string       `json:"author,omitempty"`
-	Category    *BookCategory `json:"category,omitempty"`
-	Description *string       `json:"description,omitempty"`
-	Isbn        *string       `json:"isbn,omitempty"`
-	CoverImage  *string       `json:"coverImage,omitempty"`
+	Title       *string       `json:"title,omitempty" bson:"title"`
+	Author      *string       `json:"author,omitempty" bson:"author"`
+	Category    *BookCategory `json:"category,omitempty" bson:"category"`
+	Description *string       `json:"description,omitempty" bson:"description"`
+	Isbn        *string       `json:"isbn,omitempty" bson:"isbn"`
+	CoverImage  *string       `json:"coverImage,omitempty" bson:"coverImage"`
 }
 
 type Library struct {
-	BorrowedBooks  []*Book `json:"borrowedBooks,omitempty"`
-	ReservedBooks  []*Book `json:"reservedBooks,omitempty"`
-	PurchasedBooks []*Book `json:"purchasedBooks,omitempty"`
-	FavoriteBooks  []*Book `json:"favoriteBooks,omitempty"`
+	BorrowedBooks  []*Book `json:"borrowedBooks,omitempty" bson:"borrowedBooks"`
+	ReservedBooks  []*Book `json:"reservedBooks,omitempty" bson:"reservedBooks"`
+	PurchasedBooks []*Book `json:"purchasedBooks,omitempty" bson:"purchasedBooks"`
+	FavoriteBooks  []*Book `json:"favoriteBooks,omitempty" bson:"favoriteBooks"`
 }
 
 type Mutation struct {
 }
 
 type Notification struct {
-	ID        string  `json:"id"`
-	Type      string  `json:"type"`
-	Message   string  `json:"message"`
-	CreatedAt *string `json:"createdAt,omitempty"`
-	Read      *bool   `json:"read,omitempty"`
+	ID        string  `json:"id" bson:"_id"`
+	Type      string  `json:"type" bson:"type"`
+	Message   string  `json:"message" bson:"message"`
+	CreatedAt *string `json:"createdAt,omitempty" bson:"createdAt"`
+	Read      *bool   `json:"read,omitempty" bson:"read"`
 }
 
 type NotificationSettings struct {
-	DueDateReminders  *bool `json:"dueDateReminders,omitempty"`
-	NewArrivals       *bool `json:"newArrivals,omitempty"`
-	CommunityActivity *bool `json:"communityActivity,omitempty"`
+	DueDateReminders  *bool `json:"dueDateReminders,omitempty" bson:"dueDateReminders"`
+	NewArrivals       *bool `json:"newArrivals,omitempty" bson:"newArrivals"`
+	CommunityActivity *bool `json:"communityActivity,omitempty" bson:"communityActivity"`
 }
 
 type NotificationSettingsInput struct {
-	DueDateReminders  *bool `json:"dueDateReminders,omitempty"`
-	NewArrivals       *bool `json:"newArrivals,omitempty"`
-	CommunityActivity *bool `json:"communityActivity,omitempty"`
+	DueDateReminders  *bool `json:"dueDateReminders,omitempty" bson:"dueDateReminders,omitempty"`
+	NewArrivals       *bool `json:"newArrivals,omitempty" bson:"newArrivals,omitempty"`
+	CommunityActivity *bool `json:"communityActivity,omitempty" bson:"communityActivity,omitempty"`
 }
 
 type PaymentDetails struct {
-	Method        string `json:"method"`
-	TransactionID string `json:"transactionId"`
+	Method        string `json:"method" bson:"method"`
+	TransactionID string `json:"transactionId" bson:"transactionId"`
 }
 
 type PaymentInput struct {
-	Method     string  `json:"method"`
-	CardNumber *string `json:"cardNumber,omitempty"`
-	ExpiryDate *string `json:"expiryDate,omitempty"`
-	Cvv        *string `json:"cvv,omitempty"`
+	Method     string  `json:"method" bson:"method"`
+	CardNumber *string `json:"cardNumber,omitempty" bson:"cardNumber,omitempty"`
+	ExpiryDate *string `json:"expiryDate,omitempty" bson:"expiryDate,omitempty"`
+	Cvv        *string `json:"cvv,omitempty" bson:"cvv,omitempty"`
 }
 
 type PurchaseReceipt struct {
-	Book           *Book           `json:"book"`
-	Price          float64         `json:"price"`
-	PaymentDetails *PaymentDetails `json:"paymentDetails"`
+	Book           *Book           `json:"book" bson:"book"`
+	Price          float64         `json:"price" bson:"price"`
+	PaymentDetails *PaymentDetails `json:"paymentDetails" bson:"paymentDetails"`
 }
 
 type Query struct {
 }
 
 type Report struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	GeneratedAt string `json:"generatedAt"`
-	Data        string `json:"data"`
+	ID          string `json:"id" bson:"_id,omitempty"`
+	Title       string `json:"title" bson:"title"`
+	GeneratedAt string `json:"generatedAt" bson:"generatedAt"`
+	Data        string `json:"data" bson:"data"`
 }
 
 type ReportFilterInput struct {
-	DateRange    *DateRangeInput `json:"dateRange,omitempty"`
-	Category     *BookCategory   `json:"category,omitempty"`
-	UserActivity *string         `json:"userActivity,omitempty"`
+	DateRange    *DateRangeInput `json:"dateRange,omitempty" bson:"dateRange,omitempty"`
+	Category     *BookCategory   `json:"category,omitempty" bson:"category,omitempty"`
+	UserActivity *string         `json:"userActivity,omitempty" bson:"userActivity,omitempty"`
 }
 
 type ReserveReceipt struct {
-	Book            *Book  `json:"book"`
-	ReservationDate string `json:"reservationDate"`
+	Book            *Book  `json:"book" bson:"book"`
+	ReservationDate string `json:"reservationDate" bson:"reservationDate"`
 }
 
 type Review struct {
-	ID        string  `json:"id"`
-	User      *User   `json:"user"`
-	Book      *Book   `json:"book"`
-	Rating    float64 `json:"rating"`
-	Content   *string `json:"content,omitempty"`
-	CreatedAt *string `json:"createdAt,omitempty"`
+	ID        string  `json:"id" bson:"_id,omitempty"`
+	User      *User   `json:"user" bson:"user"`
+	Book      *Book   `json:"book" bson:"book"`
+	Rating    float64 `json:"rating" bson:"rating"`
+	Content   *string `json:"content,omitempty" bson:"content,omitempty"`
+	CreatedAt *string `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
 }
 
 type ReviewInput struct {
-	Rating  float64 `json:"rating"`
-	Content *string `json:"content,omitempty"`
+	Rating  float64 `json:"rating" bson:"rating"`
+	Content *string `json:"content,omitempty" bson:"content,omitempty"`
 }
 
 type SignUpInput struct {
-	Name           string          `json:"name"`
-	Email          string          `json:"email"`
-	Password       string          `json:"password"`
-	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty"`
+	Name           string          `json:"name" bson:"name"`
+	Email          string          `json:"email" bson:"email"`
+	Password       string          `json:"password" bson:"password"`
+	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty" bson:"favoriteGenres,omitempty"`
 }
 
 type UpdateProfileInput struct {
-	Name           *string         `json:"name,omitempty"`
-	Email          *string         `json:"email,omitempty"`
-	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty"`
+	Name           *string         `json:"name,omitempty" bson:"name,omitempty"`
+	Email          *string         `json:"email,omitempty" bson:"email,omitempty"`
+	FavoriteGenres []*BookCategory `json:"favoriteGenres,omitempty" bson:"favoriteGenres,omitempty"`
 }
 
 type User struct {
-	ID             string             `json:"id"`
-	Name           string             `json:"name"`
-	Email          string             `json:"email"`
-	Password       string             `json:"password"`
-	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty"`
-	ActivityStats  *UserActivityStats `json:"activityStats,omitempty"`
-	Role           UserRole           `json:"role"`
+	ID             string             `json:"id" bson:"_id"`
+	Name           string             `json:"name" bson:"name"`
+	Email          string             `json:"email" bson:"email"`
+	Password       string             `json:"password" bson:"password"`
+	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty" bson:"favoriteGenres"`
+	ActivityStats  *UserActivityStats `json:"activityStats,omitempty" bson:"activityStats"`
+	Role           UserRole           `json:"role" bson:"role"`
 }
 
 type UserActivityStats struct {
-	BooksBorrowed  *int `json:"booksBorrowed,omitempty"`
-	ReviewsWritten *int `json:"reviewsWritten,omitempty"`
+	BooksBorrowed  *int `json:"booksBorrowed,omitempty" bson:"booksBorrowed,omitempty"`
+	ReviewsWritten *int `json:"reviewsWritten,omitempty" bson:"reviewsWritten,omitempty"`
 }
 
 type UserProfile struct {
-	User           *User              `json:"user"`
-	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty"`
-	ActivityStats  *UserActivityStats `json:"activityStats,omitempty"`
+	User           *User              `json:"user" bson:"user"`
+	FavoriteGenres []*BookCategory    `json:"favoriteGenres,omitempty" bson:"favoriteGenres,omitempty"`
+	ActivityStats  *UserActivityStats `json:"activityStats,omitempty" bson:"activityStats,omitempty"`
 }
 
 type BookAvailability string
